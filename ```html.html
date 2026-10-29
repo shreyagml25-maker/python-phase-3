@@ -1,0 +1,363 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Stock Analysis System</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px #ccc;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1d4ed8;
+        }
+
+        h2 {
+            color: #1e40af;
+            margin-top: 25px;
+        }
+
+        .dashboard {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .card {
+            flex: 1;
+            padding: 18px;
+            background: #dbeafe;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .card h3 {
+            font-size: 25px;
+            margin: 5px;
+            color: #1d4ed8;
+        }
+
+        input, select, button {
+            padding: 11px;
+            margin: 6px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        input, select {
+            width: 100%;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1e40af;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px 6px;
+            text-align: center;
+        }
+
+        th {
+            background: #2563eb;
+            color: white;
+        }
+
+        .low {
+            color: red;
+            font-weight: bold;
+        }
+
+        #message {
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 550px) {
+            .dashboard {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 12px;
+            }
+
+            .buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Inventory Stock Analysis System</h1>
+    <p style="text-align:center;">
+        Manage your products and stock easily
+    </p>
+
+    <div class="dashboard">
+        <div class="card">
+            <h3 id="totalProducts">5</h3>
+            Total Products
+        </div>
+
+        <div class="card">
+            <h3 id="totalStock">70</h3>
+            Total Stock
+        </div>
+
+        <div class="card">
+            <h3 id="lowStock">0</h3>
+            Low Stock Items
+        </div>
+    </div>
+
+    <h2>Search Product Stock</h2>
+
+    <input type="text" id="searchName"
+           placeholder="Enter product name">
+
+    <button onclick="searchStock()">Search Product</button>
+
+    <h2>Manage Inventory</h2>
+
+    <label>Select Product:</label>
+    <select id="productSelect"></select>
+
+    <label>Enter Quantity:</label>
+    <input type="number" id="quantity"
+           placeholder="Enter quantity" min="1">
+
+    <div class="buttons">
+        <button onclick="addStock()">Add New Stock</button>
+        <button onclick="updateSales()">Update Sales</button>
+        <button onclick="viewStock()">View All Stock</button>
+        <button onclick="clearForm()">Clear Form</button>
+    </div>
+
+    <p id="message"></p>
+
+    <h2>All Product Stock</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Available Stock</th>
+                <th>Minimum Stock</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody id="stockTable"></tbody>
+    </table>
+
+</div>
+
+<script>
+    let products = {
+        "Laptop": 10,
+        "Mouse": 25,
+        "Keyboard": 15,
+        "Monitor": 12,
+        "Headphones": 8
+    };
+
+    const minimumStock = {
+        "Laptop": 5,
+        "Mouse": 10,
+        "Keyboard": 5,
+        "Monitor": 5,
+        "Headphones": 5
+    };
+
+    function loadProducts() {
+        let select = document.getElementById("productSelect");
+        select.innerHTML = "";
+
+        for (let name in products) {
+            let option = document.createElement("option");
+            option.value = name;
+            option.textContent = name;
+            select.appendChild(option);
+        }
+    }
+
+    function showMessage(text, isError = false) {
+        let message = document.getElementById("message");
+        message.textContent = text;
+        message.style.color = isError ? "red" : "green";
+    }
+
+    function updateTable() {
+        let table = document.getElementById("stockTable");
+        table.innerHTML = "";
+
+        let total = 0;
+        let low = 0;
+
+        for (let name in products) {
+            let stock = products[name];
+            let minimum = minimumStock[name];
+
+            total += stock;
+
+            let status = stock <= minimum
+                ? "Low Stock"
+                : "Available";
+
+            if (stock <= minimum) {
+                low++;
+            }
+
+            let row = table.insertRow();
+
+            row.insertCell().textContent = name;
+            row.insertCell().textContent = stock;
+            row.insertCell().textContent = minimum;
+
+            let statusCell = row.insertCell();
+            statusCell.textContent = status;
+
+            if (stock <= minimum) {
+                statusCell.className = "low";
+            }
+        }
+
+        document.getElementById("totalProducts").textContent =
+            Object.keys(products).length;
+
+        document.getElementById("totalStock").textContent = total;
+
+        document.getElementById("lowStock").textContent = low;
+    }
+
+    function searchStock() {
+        let search = document.getElementById("searchName")
+            .value.trim().toLowerCase();
+
+        let name = Object.keys(products).find(
+            item => item.toLowerCase() === search
+        );
+
+        if (name) {
+            document.getElementById("productSelect").value = name;
+
+            let status = products[name] <= minimumStock[name]
+                ? "Low Stock! Please restock."
+                : "Stock Available.";
+
+            showMessage(
+                name + " has " + products[name] +
+                " units. " + status
+            );
+        } else {
+            showMessage("Product not found!", true);
+        }
+    }
+
+    function addStock() {
+        let name = document.getElementById("productSelect").value;
+        let quantity = Number(
+            document.getElementById("quantity").value
+        );
+
+        if (!Number.isInteger(quantity) || quantity <= 0) {
+            showMessage("Enter a valid positive quantity!", true);
+            return;
+        }
+
+        products[name] += quantity;
+
+        updateTable();
+        showMessage("Stock added successfully!");
+
+        document.getElementById("quantity").value = "";
+    }
+
+    function updateSales() {
+        let name = document.getElementById("productSelect").value;
+        let quantity = Number(
+            document.getElementById("quantity").value
+        );
+
+        if (!Number.isInteger(quantity) || quantity <= 0) {
+            showMessage("Enter a valid positive quantity!", true);
+            return;
+        }
+
+        if (quantity > products[name]) {
+            showMessage("Not enough stock available!", true);
+            return;
+        }
+
+        products[name] -= quantity;
+
+        updateTable();
+
+        if (products[name] <= minimumStock[name]) {
+            showMessage("Sale recorded! Low stock warning.", true);
+        } else {
+            showMessage("Sale recorded successfully!");
+        }
+
+        document.getElementById("quantity").value = "";
+    }
+
+    function viewStock() {
+        updateTable();
+        showMessage("All stock details displayed.");
+    }
+
+    function clearForm() {
+        document.getElementById("quantity").value = "";
+        document.getElementById("searchName").value = "";
+        showMessage("Form cleared.");
+    }
+
+    loadProducts();
+    updateTable();
+</script>
+
+</body>
+</html>
+```
