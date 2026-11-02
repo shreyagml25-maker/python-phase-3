@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stockroom – Inventory App</title>
+<style>
+:root{--bg:#f8fafc;--card:#fff;--text:#0f172a;--mute:#64748b;--line:#e2e8f0;--pri:#4f35f3;--priS:#eef0ff;--ok:#059669;--okS:#d1fae5;--warn:#d97706;--warnS:#fef3c7;--bad:#e11d48;--badS:#ffe4e6}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1020;--card:#131a2e;--text:#e8ecf8;--mute:#8d9ab5;--line:#25304d;--pri:#8b7bff;--priS:#232a52;--okS:#0f3a2e;--warnS:#3d2f0b;--badS:#4a1624}}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.45 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 40px}
+header{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:42px;height:42px;border-radius:12px;background:var(--pri);color:#fff;display:grid;place-items:center;font-size:20px}
+h1{margin:0;font-size:20px}
+.pill{font-size:12px;background:var(--line);padding:2px 10px;border-radius:99px;margin-left:6px;font-weight:500;color:var(--mute)}
+.sub{color:var(--mute);font-size:12px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text);padding:7px 12px;font-weight:500}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+button.p{background:var(--pri);color:#fff;border-color:var(--pri)}
+button:disabled{opacity:.4;cursor:not-allowed}
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:20px}
+.tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;color:var(--mute);padding:12px 14px;white-space:nowrap}
+.tabs button.on{color:var(--pri);border-color:var(--pri)}
+.badge{background:var(--warnS);color:var(--warn);border-radius:99px;padding:0 7px;font-size:12px;margin-left:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.kpi.alert{border-color:#fda4af}
+.kpi small{color:var(--mute);font-weight:600;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.kpi b{display:block;font-size:26px;margin:6px 0 2px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.bar{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;padding:14px}
+.bar input{flex:1;min-width:200px;max-width:440px}
+input,select{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--text);width:100%}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chips button{border-radius:99px;padding:5px 12px;font-size:13px}
+.chips button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:860px}
+th{background:var(--bg);text-align:left;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute);padding:12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;user-select:none}
+td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.r{text-align:right}
+.sku{font:700 12px ui-monospace,Menlo,monospace;background:var(--bg);border:1px solid var(--line);padding:2px 8px;border-radius:6px}
+.cat{display:block;color:var(--mute);font-size:12px;margin-top:2px}
+.meter{height:6px;width:100px;background:var(--line);border-radius:9px;margin-top:4px;overflow:hidden}
+.meter i{display:block;height:100%}
+.st{padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap}
+.in{background:var(--okS);color:var(--ok)}.low{background:var(--warnS);color:var(--warn)}.out{background:var(--badS);color:var(--bad)}
+.acts{display:flex;gap:6px;justify-content:flex-end;align-items:center}
+.acts .s{background:var(--priS);color:var(--pri);border-color:transparent;padding:4px 10px}
+.acts .rs{background:var(--okS);color:var(--ok);border-color:transparent;padding:4px 10px}
+.acts .i{border:0;background:none;color:var(--mute);padding:4px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;padding:14px;color:var(--mute);font-size:12px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 4px 0 10px}
+.list{padding:6px 14px}
+.row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.empty{padding:40px;text-align:center;color:var(--mute)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.grid2 .panel{padding:16px}
+.grid2 h3{margin:0 0 12px;font-size:15px}
+.hb{display:grid;grid-template-columns:110px 1fr 70px;gap:10px;align-items:center;margin:8px 0;font-size:13px}
+.hb .t{height:10px;background:var(--line);border-radius:9px;overflow:hidden}
+.hb .t i{display:block;height:100%;background:var(--pri)}
+dialog{border:1px solid var(--line);border-radius:14px;padding:22px;width:min(420px,92vw);background:var(--card);color:var(--text)}
+dialog::backdrop{background:rgba(15,23,42,.5)}
+dialog label{display:block;margin:10px 0 4px;font-weight:600;font-size:13px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mf{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="brand"><div class="logo">▣</div>
+    <div><h1>Stockroom<span class="pill">Inventory App</span></h1><div class="sub">Track products, manage stock levels, sell items &amp; monitor replenishment</div></div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button id="reset">Reset demo</button><button id="export">Export CSV</button><button class="p" id="add">+ Add product</button>
+  </div>
+</header>
+<nav class="tabs" id="tabs" style="margin-top:0"></nav>
+<main id="view"></main>
+</div>
+
+<dialog id="dlg"><form method="dialog" id="form">
+  <h2 id="dt" style="margin:0 0 6px;font-size:18px">Add product</h2>
+  <label for="fn">Product name</label><input id="fn" required>
+  <div class="two"><div><label for="fc">Category</label><input id="fc" required></div><div><label for="fp">Unit price ($)</label><input id="fp" type="number" min="0" step="0.01" required></div></div>
+  <div class="two"><div><label for="fs">Stock level</label><input id="fs" type="number" min="0" step="1" required></div><div><label for="fr">Reorder level</label><input id="fr" type="number" min="0" step="1" required></div></div>
+  <div class="mf"><button type="button" id="cancel">Cancel</button><button class="p" type="submit">Save product</button></div>
+</form></dialog>
+<div id="toast" role="status"></div>
+
+<script>
+const SEED=[
+["Wireless Ergonomic Keyboard","Electronics",89.99,18,45,10],
+["Precision Optical Mouse","Electronics",34.5,6,112,15],
+["USB-C Multiport Docking Station","Hardware",129,0,84,8],
+["27-inch 4K UHD Monitor","Displays",349.99,14,38,5],
+["Noise-Cancelling Studio Headset","Audio",179.95,7,63,12],
+["Braided Fast-Charging USB-C Cable (2m)","Accessories",15.99,120,450,30],
+["Heavy Duty Thermal Label Printer","Equipment",219,4,19,5],
+["Thermal Shipping Labels (Roll of 500)","Supplies",12.5,85,340,25],
+["Adjustable Aluminum Laptop Stand","Accessories",49.99,22,76,10],
+["1080p Streamer Pro Webcam","Electronics",74.5,0,92,10]
+].map((a,i)=>({id:"PRD-"+String(i+1).padStart(3,"0"),name:a[0],cat:a[1],price:a[2],stock:a[3],sold:a[4],reorder:a[5]}));
+
+const KEY="stockroom-v1";
+let S=load();
+let ui={tab:"products",q:"",f:"all",sort:"id",dir:1,edit:null};
+
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.items)return d}catch(e){}return{items:structuredClone(SEED),log:[]}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=n=>"$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const status=p=>p.stock===0?"out":p.stock<=p.reorder?"low":"in";
+const LABEL={in:"In Stock",low:"Low Stock",out:"Out of Stock"};
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),2200)}
+
+function stats(){
+  const it=S.items;
+  return{n:it.length,units:it.reduce((a,p)=>a+p.stock,0),sold:it.reduce((a,p)=>a+p.sold,0),
+    val:it.reduce((a,p)=>a+p.stock*p.price,0),rev:it.reduce((a,p)=>a+p.sold*p.price,0),
+    out:it.filter(p=>status(p)==="out").length,low:it.filter(p=>status(p)==="low").length}
+}
+
+function render(){
+  const st=stats(),al=st.out+st.low;
+  $("#tabs").innerHTML=[["products","Products & Inventory"],["alerts","Stock Alerts"],["log","Sales & Restock Log"],["summary","Summary & Analytics"]]
+   .map(([k,l])=>`<button class="${ui.tab===k?"on":""}" data-tab="${k}">${l}${k==="alerts"&&al?`<span class="badge">${al}</span>`:""}</button>`).join("");
+  const v=$("#view");
+  if(ui.tab==="products")v.innerHTML=kpis(st,al)+products();
+  else if(ui.tab==="alerts")v.innerHTML=alerts();
+  else if(ui.tab==="log")v.innerHTML=logView();
+  else v.innerHTML=summary(st);
+}
+
+function kpis(st,al){
+  const k=(l,v,s,c="",cl="")=>`<div class="kpi ${cl}"><small>${l}</small><b style="color:${c}">${v}</b><span class="sub">${s}</span></div>`;
+  return`<div class="kpis">`+
+   k("Catalog items",st.n,"Unique product SKUs")+
+   k("Stock on hand",st.units,"Total physical units","var(--ok)")+
+   k("Total sold",st.sold.toLocaleString(),"Total units dispensed","#2563eb")+
+   k("Stock valuation",money(st.val),"Current assets value")+
+   k("Sales revenue",money(st.rev),"Cumulative sales","#7e22ce")+
+   k("Stock alerts",al,`<span style="color:var(--bad)">${st.out} out</span> • <span style="color:var(--warn)">${st.low} low</span>`,"var(--bad)",al?"alert":"")+`</div>`;
+}
+
+function visible(){
+  const q=ui.q.toLowerCase();
+  let a=S.items.filter(p=>(ui.f==="all"||status(p)===ui.f)&&(!q||(p.id+p.name+p.cat).toLowerCase().includes(q)));
+  a.sort((x,y)=>{const A=x[ui.sort],B=y[ui.sort];return(typeof A==="string"?A.localeCompare(B):A-B)*ui.dir});
+  return a;
+}
+
+function products(){
+  const c=k=>S.items.filter(p=>status(p)===k).length;
+  const chip=(k,l,n)=>`<button class="${ui.f===k?"on":""}" data-f="${k}">${l} (${n})</button>`;
+  const rows=visible().map(p=>{const s=status(p),pct=Math.min(100,p.stock/(p.reorder*3)*100),col=s==="in"?"#10b981":s==="low"?"#f59e0b":"#cbd5e1";
+    return`<tr><td><span class="sku">${p.id}</span><span class="cat">${esc(p.cat)}</span></td>
+    <td style="font-weight:600;max-width:240px">${esc(p.name)}</td><td class="r">${money(p.price)}</td>
+    <td><b style="color:${s==="in"?"inherit":s==="low"?"var(--warn)":"var(--bad)"}">${p.stock}</b> <span class="sub">units</span><div class="meter"><i style="width:${pct}%;background:${col}"></i></div></td>
+    <td class="r"><b>${p.sold}</b> <span class="sub">sold</span></td><td class="r sub">${p.reorder}</td>
+    <td><span class="st ${s}">${LABEL[s]}</span></td>
+    <td><div class="acts"><button class="s" data-sell="${p.id}" ${p.stock?"":"disabled"}>Sell</button><button class="rs" data-rs="${p.id}">Restock</button>
+    <button class="i" title="Edit" aria-label="Edit ${esc(p.name)}" data-edit="${p.id}">✎</button><button class="i" title="Delete" aria-label="Delete ${esc(p.name)}" data-del="${p.id}">🗑</button></div></td></tr>`}).join("");
+  const th=(k,l,cls="")=>`<th class="${cls}" data-sort="${k}">${l} ${ui.sort===k?(ui.dir>0?"▲":"▼"):"⇅"}</th>`;
+  return`<div class="panel"><div class="bar"><input id="q" placeholder="Search by ID, product name, or category..." value="${esc(ui.q)}" aria-label="Search products">
+   <div class="chips"><span class="sub">Status:</span>${chip("all","All",S.items.length)}${chip("in","In Stock",c("in"))}${chip("low","Low Stock",c("low"))}${chip("out","Out of Stock",c("out"))}</div></div>
+   <div class="scroll"><table><thead><tr>${th("id","ID / SKU")}${th("name","Product name")}${th("price","Unit price","r")}${th("stock","Stock level")}${th("sold","Units sold","r")}${th("reorder","Reorder level","r")}<th style="cursor:default">Status</th><th style="cursor:default"></th></tr></thead>
+   <tbody>${rows||`<tr><td colspan="8" class="empty">No products match. Clear the search or add a product.</td></tr>`}</tbody></table></div>
+   <div class="foot"><span>Showing ${visible().length} of ${S.items.length} products</span><span><i class="dot" style="background:#10b981"></i>In Stock (&gt; reorder level)<i class="dot" style="background:#f59e0b"></i>Low Stock (≤ reorder level)<i class="dot" style="background:#e11d48"></i>Out of Stock (0 units)</span></div></div>`;
+}
+
+function alerts(){
+  const a=S.items.filter(p=>status(p)!=="in").sort((x,y)=>x.stock-y.stock);
+  if(!a.length)return`<div class="panel empty">All products are above their reorder level.</div>`;
+  return`<div class="panel list">`+a.map(p=>`<div class="row"><div><b>${esc(p.name)}</b> <span class="sku">${p.id}</span><div class="sub">${p.stock} in stock • reorder at ${p.reorder}</div></div>
+   <div class="acts"><span class="st ${status(p)}">${LABEL[status(p)]}</span><button class="rs" data-rs="${p.id}">Restock</button></div></div>`).join("")+`</div>`;
+}
+
+function logView(){
+  if(!S.log.length)return`<div class="panel empty">No activity yet. Use Sell or Restock on the Products tab and it will appear here.</div>`;
+  return`<div class="panel list">`+S.log.map(l=>`<div class="row"><div><b>${esc(l.name)}</b><div class="sub">${new Date(l.t).toLocaleString()}</div></div>
+   <div><span class="st ${l.type==="sale"?"low":"in"}">${l.type==="sale"?"Sold":"Restocked"} ${l.qty}</span>${l.type==="sale"?` <b>${money(l.amt)}</b>`:""}</div></div>`).join("")+`</div>`;
+}
+
+function summary(st){
+  const cats={};S.items.forEach(p=>{cats[p.cat]=(cats[p.cat]||0)+p.stock*p.price});
+  const cm=Math.max(...Object.values(cats),1),top=[...S.items].sort((a,b)=>b.sold*b.price-a.sold*a.price).slice(0,5),tm=top[0]?top[0].sold*top[0].price:1;
+  return`<div class="grid2"><div class="panel"><h3>Stock value by category</h3>${Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="hb"><span>${esc(k)}</span><div class="t"><i style="width:${v/cm*100}%"></i></div><span class="r">${money(v)}</span></div>`).join("")}</div>
+  <div class="panel"><h3>Top 5 by revenue</h3>${top.map(p=>`<div class="hb"><span title="${esc(p.name)}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</span><div class="t"><i style="width:${p.sold*p.price/tm*100}%"></i></div><span class="r">${money(p.sold*p.price)}</span></div>`).join("")}</div>
+  <div class="panel"><h3>Overview</h3><p>Average unit price: <b>${money(S.items.reduce((a,p)=>a+p.price,0)/(S.items.length||1))}</b></p><p>Products needing attention: <b>${st.out+st.low}</b> of ${st.n}</p><p>Revenue vs. stock value: <b>${st.val?(st.rev/st.val).toFixed(1):"–"}×</b></p></div></div>`;
+}
+
+function ask(msg){const n=parseInt(prompt(msg,"1"),10);return n>0?n:0}
+function find(id){return S.items.find(p=>p.id===id)}
+
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button,th");if(!t)return;
+  const d=t.dataset;
+  if(d.tab){ui.tab=d.tab}
+  else if(d.f){ui.f=d.f}
+  else if(d.sort){ui.dir=ui.sort===d.sort?-ui.dir:1;ui.sort=d.sort}
+  else if(d.sell){const p=find(d.sell),n=ask(`Sell how many units of "${p.name}"? (${p.stock} available)`);if(!n)return;
+    if(n>p.stock)return toast("Not enough stock. Only "+p.stock+" available.");
+    p.stock-=n;p.sold+=n;S.log.unshift({t:Date.now(),type:"sale",name:p.name,qty:n,amt:n*p.price});toast(`Sold ${n} × ${p.name}`)}
+  else if(d.rs){const p=find(d.rs),n=ask(`Restock how many units of "${p.name}"?`);if(!n)return;
+    p.stock+=n;S.log.unshift({t:Date.now(),type:"restock",name:p.name,qty:n});toast(`Restocked ${n} × ${p.name}`)}
+  else if(d.del){const p=find(d.del);if(!confirm(`Delete "${p.name}"? This cannot be undone.`))return;S.items=S.items.filter(x=>x!==p);toast("Product deleted")}
+  else if(d.edit){openForm(find(d.edit));return}
+  else if(t.id==="add"){openForm(null);return}
+  else if(t.id==="cancel"){$("#dlg").close();return}
+  else if(t.id==="reset"){if(!confirm("Reset all data back to the demo products?"))return;S={items:structuredClone(SEED),log:[]};toast("Demo data restored")}
+  else if(t.id==="export"){exportCsv();return}
+  else return;
+  save();render();
+});
+
+document.addEventListener("input",e=>{
+  if(e.target.id!=="q")return;
+  ui.q=e.target.value;const pos=e.target.selectionStart;render();
+  const q=$("#q");q.focus();q.setSelectionRange(pos,pos);
+});
+
+function openForm(p){
+  ui.edit=p?p.id:null;$("#dt").textContent=p?"Edit product":"Add product";
+  $("#fn").value=p?p.name:"";$("#fc").value=p?p.cat:"";$("#fp").value=p?p.price:"";$("#fs").value=p?p.stock:0;$("#fr").value=p?p.reorder:10;
+  $("#dlg").showModal();
+}
+$("#form").addEventListener("submit",()=>{
+  const v={name:$("#fn").value.trim(),cat:$("#fc").value.trim(),price:+$("#fp").value,stock:+$("#fs").value,reorder:+$("#fr").value};
+  if(ui.edit)Object.assign(find(ui.edit),v);
+  else{const n=Math.max(0,...S.items.map(p=>+p.id.slice(4)))+1;S.items.push({id:"PRD-"+String(n).padStart(3,"0"),sold:0,...v})}
+  save();render();toast(ui.edit?"Product updated":"Product added");
+});
+
+function exportCsv(){
+  const rows=[["ID","Name","Category","Price","Stock","Sold","Reorder","Status"],...S.items.map(p=>[p.id,p.name,p.cat,p.price,p.stock,p.sold,p.reorder,LABEL[status(p)]])];
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="stockroom-inventory.csv";a.click();
+}
+render();
+</script>
+</body>
+</html>
